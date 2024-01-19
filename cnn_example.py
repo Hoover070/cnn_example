@@ -87,7 +87,7 @@ def load_cifar():
 def preprocess(xtrain, ytrain, xtest, ytest):
     xtrain, xtest = xtrain / 255.00, xtest / 255.00
     ytrain, ytest = ytrain.flatten(), ytest.flatten()
-    return xtrain, xtest, ytrain, ytest
+    return xtrain, ytrain, xtest, ytest
 
 # define model
 def define_model(xtrain, ytrain):
@@ -141,11 +141,13 @@ def define_model(xtrain, ytrain):
 # compile
 def compile_model(model):
     # compile model
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='adam', 
+                  loss='sparse_categorical_crossentropy', 
+                  metrics=['accuracy'])
 
 # augment training data
 def data_aug():
-    data_generator = ImageDataGenerator(width_shift_range=0.2,
+    data_generator = ImageDataGenerator(width_shift_range=0.1,
                                         height_shift_range=0.1,
                                         zoom_range=[0.90, 1.1],
                                         rotation_range=10,
@@ -155,7 +157,7 @@ def data_aug():
 
 # harness
 X_train, y_train, X_test, y_test = load_cifar()
-X_train, X_test, y_train, y_test = preprocess(X_train, y_train, X_test, y_test)
+X_train, y_train, X_test, y_test = preprocess(X_train, y_train, X_test, y_test)
 model = define_model(X_train, y_train)
 compile_model(model)
 #model.summary()
@@ -173,7 +175,7 @@ train_generator = train_gen.flow(X_train, y_train, batch_size=BATCH_SIZE)
 steps_per_epoch = X_train.shape[0] // BATCH_SIZE
 history = model.fit(train_generator, validation_data=[X_test, y_test],
                      steps_per_epoch=steps_per_epoch,
-                     epochs=5)
+                     epochs=100)
 
 # plot learning curves
 plot_scores(history)
