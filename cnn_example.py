@@ -77,11 +77,92 @@ def plot_scores(history):
 
 
 # Load data
-    
+
+def load_cifar():
+    # load cifar10 dataset
+    (xtrain, ytrain), (xtest, ytest) = cifar10.load_data()
+    return xtrain, ytrain, xtest, ytest
 
 # preprocess data scale/flatten
-    
+def preprocess(xtrain, ytrain, xtest, ytest):
+    xtrain, xtest = xtrain / 255.00, xtest / 255.00
+    ytrain, ytest = ytrain.flatten(), ytest.flatten()
+    return xtrain, xtest, ytrain, ytest
 
 # define model
+def define_model(xtrain, ytrain):
+    # number of classes
+    k = len(set(ytrain))
+    print('number of classes', k)
+
+    # build network structure
+    # input
+    i = Input(shape=xtrain[0].shape)
+    # conv_1
+    x = Conv2D(32, (3,3), activation='relu', padding='same')(i)
+    x = BatchNormalization()(x)
+    x = Conv2D(32, (3,3), activation='relu', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Conv2D(32, (3,3), activation='relu', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = MaxPooling2D((2,2))(x)
+    
+    
+    # conv_2
+    x = Conv2D(64, (3,3), activation='relu', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Conv2D(64, (3,3), activation='relu', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Conv2D(64, (3,3), activation='relu', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = MaxPooling2D((2,2))(x)
+
+     # conv_3
+    x = Conv2D(128, (3,3), activation='relu', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Conv2D(128, (3,3), activation='relu', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Conv2D(128, (3,3), activation='relu', padding='same')(x)
+    x = BatchNormalization()(x)
+    x = MaxPooling2D((2,2))(x)
+
+    # Dense Layer (FC)
+    x = Flatten()(x)
+    x = Dropout(0.2)(x)
+    x = Dense(1024, activation='relu')(x)
+     
+    # softmax
+    x = Dense(k, activation='softmax')(x)
+
+    model = Model(i, x)
+
+    return model
+
+# compile
+def compile_model(model):
+    # compile model
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+# augment training data
+def data_aug():
+    data_generator = ImageDataGenerator(width_shift_range=0.2,
+                                        height_shift_range=0.1,
+                                        zoom_range=[0.85, 1.2],
+                                        rotation_range=15,
+                                        horizontal_flip=True,
+                                        fill_mode='nearest')
+    return data_generator
+
+# harness
+X_train, y_test, x_test, y_train = load_cifar()
+X_train, x_test, y_train, y_test = preprocess(X_train, y_train, x_test, y_test)
+model = define_model(X_train, y_train)
+compile_model(model)
+model.summary()
+
+# fit model
+
+# plot learning curves
 
 
+# test accuracy
