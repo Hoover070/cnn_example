@@ -168,23 +168,15 @@ def main():
     X_train, y_train, X_test, y_test = preprocess(X_train, y_train, X_test, y_test)
     model = define_model(X_train, y_train)
     compile_model(model)
-    #model.summary()
-
-
     train_gen = data_aug()
-    '''data = np.expand_dims(X_train[60], axis=0)
-    print(data.shape)
-    train_generator = train_gen.flow(data, batch_size=1)
-    plot_iter(train_generator)
-    plot_imgs(X_train)'''
 
     # fit model
     train_generator = train_gen.flow(X_train, y_train, batch_size=BATCH_SIZE)
     steps_per_epoch = X_train.shape[0] // BATCH_SIZE
     history = model.fit(train_generator, validation_data=[X_test, y_test],
                         steps_per_epoch=steps_per_epoch,
-                        epochs=50) # change to 50 after verfiying code works
-
+                        epochs=50) 
+    
     # plot learning curves
     plot_scores(history)
 
